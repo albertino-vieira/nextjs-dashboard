@@ -202,3 +202,39 @@ export async function createCustomer(prevState: CustomerState, formData: FormDat
   revalidatePath('/dashboard/customers');
   redirect('/dashboard/customers');
 }
+
+// Use Zod to update the expected types
+const UpdateCustomers = FormSchemaCustomer.omit({ id: true, date: true });
+ 
+export async function updateCustomers(
+  id: string,
+  prevState: CustomerState,
+  formData: FormData,
+) {
+  const validatedFields = UpdateCustomers.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    image_url: "/customers/delba-de-oliveira.png",
+    
+  });
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
+ 
+  const { name, email } = validatedFields.data;
+  try {
+    await sql`
+      UPDATE customers
+      SET name = ${name}, email = ${email}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Invoice.' };
+  }
+ 
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
+}
