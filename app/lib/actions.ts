@@ -138,3 +138,67 @@ export async function authenticate(
     throw error;
   }
 }
+
+
+const FormSchemaCustomer = z.object({
+  id: z.string(),
+  name: z.string({
+    invalid_type_error: 'Please select a customer.',
+  }),
+  email:  z.string({
+    invalid_type_error: 'Please select a valid email.',
+  }),
+  image_url:z.string(),
+  date: z.string(),
+});
+
+export type CustomerState = {
+  errors?: {
+    costumerName?: string[];
+    costumerEmail?: string[];
+  };
+  message?: string | null;
+};
+
+
+
+const CreateCustomer = FormSchemaCustomer.omit({ id: true, date: true });
+
+export async function createCustomer(prevState: CustomerState, formData: FormData) {
+  // Validate form using Zod
+  const validatedFields = CreateCustomer.safeParse({
+    name: formData.get('customerName'),
+    email: formData.get('customerEmail'),
+    image_url: "/customers/delba-de-oliveira.png",
+  });
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Customer.',
+    };
+  }
+ 
+  // Prepare data for insertion into the database
+  const { name, email, image_url } = validatedFields.data;
+  const date = new Date().toISOString().split('T')[0];
+ 
+  // Insert data into the database
+  try {
+    await sql`
+      INSERT INTO customers (name, email, image_url)
+      VALUES (${name}, ${email}, ${image_url})
+    `;
+  } catch (error) {
+    // If a database error occurs, return a more specific error.
+    console.log(error, "error")
+
+    return {
+      message: 'Database Error: Failed to Create Customer.',
+    };
+  }
+ 
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
+}
