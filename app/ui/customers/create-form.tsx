@@ -2,13 +2,13 @@
 import Link from 'next/link';
 import { EnvelopeIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { createCustomer } from '@/app/lib/actions';
+import { createCustomer, createInvoice } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 
 export default function Form() {
   const initialState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(createCustomer, initialState);
-  return (
+    return (
     <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
@@ -23,7 +23,7 @@ export default function Form() {
             <div className="relative">
               <input
                 id="customerName"
-                name="customerName"
+                name="name"
                 type="text"
                 placeholder="Enter customer name"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -45,7 +45,7 @@ export default function Form() {
             <div className="relative">
               <input
                 id="customerEmail"
-                name="customerEmail"
+                name="email"
                 type="text"
                 placeholder="Enter customer email"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
