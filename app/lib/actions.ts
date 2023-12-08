@@ -229,3 +229,13 @@ export async function updateCustomers(
   revalidatePath('/dashboard/customers');
   redirect('/dashboard/customers');
 }
+
+export async function deleteCustomer(id: string) {
+  try {
+    await sql`DELETE FROM customers WHERE id = ${id}`;
+    revalidatePath('/dashboard/customers');
+    return { message: 'Deleted Customer.' };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Customer Invoice.' };
+  }
+}

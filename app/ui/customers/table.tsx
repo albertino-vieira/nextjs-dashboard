@@ -1,7 +1,21 @@
 import Image from 'next/image';
 import { fetchFilteredCustomers } from '@/app/lib/data';
-import { DeleteInvoice, UpdateInvoice } from '../invoices/buttons';
-import { UpdateCustomer } from './buttons';
+import { DeleteCustomer, UpdateCustomer } from './buttons';
+
+const CanCustomerBeDeleted = ({
+  id,
+  total_pending,
+}: {
+  total_pending: string;
+  id: string;
+}) => {
+  return (
+    <div className="flex justify-end gap-2">
+      <UpdateCustomer id={id} />
+      <DeleteCustomer id={id} disabled={total_pending !== "$0.00"} />
+    </div>
+  );
+};
 
 export default async function CustomersTable({
   query,
@@ -55,10 +69,10 @@ export default async function CustomersTable({
                     <div className="pt-4 text-sm">
                       <p>{customer.total_invoices} invoices</p>
                     </div>
-                    <div className="flex justify-end gap-2">
-                      <UpdateCustomer id={customer.id} />
-                      <DeleteInvoice id={customer.id} />
-                    </div>
+                    <CanCustomerBeDeleted
+                      id={customer.id}
+                      total_pending={customer.total_pending}
+                    />
                   </div>
                 ))}
               </div>
@@ -111,10 +125,7 @@ export default async function CustomersTable({
                         {customer.total_paid}
                       </td>
                       <td className="whitespace-nowrap bg-white py-3 pl-6 pr-3">
-                        <div className="flex justify-end gap-3">
-                          <UpdateCustomer id={customer.id} />
-                          <DeleteInvoice id={customer.id} />
-                        </div>
+                        <CanCustomerBeDeleted id={customer.id} total_pending={customer.total_pending} />
                       </td>
                     </tr>
                   ))}
